@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SartainStudios.Cryptography;
-using SartainStudios.Log;
 using SartainStudios.Token;
 using Services;
 using System.Text;
@@ -17,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 const string ApplicationVersion = "1.0.0";
 string ApplicationName = builder.Configuration["ApplicationInformation:ApplicationName"];
 int AuthenticationExpirationInMinutes = int.Parse(builder.Configuration["Authentication:ExpirationInMinutes"]);
-string AuthenticationSecret = builder.Configuration["ApplicationInformation:ApplicationName"];
+string AuthenticationSecret = builder.Configuration["Authentication:Secret"];
 string CorsPolicyName = "CorsOpenPolicy";
 
 #region Filters

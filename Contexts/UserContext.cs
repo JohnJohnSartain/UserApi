@@ -10,13 +10,22 @@ public interface IUserContext : INonSpecificUserDatabaseAccess<UserModel> { }
 
 public class UserContext : MongoNonUserSpecificDatabaseAccess<UserModel>, IUserContext
 {
-    private static readonly ConnectionModel connectionModel = new()
+    public UserContext(IConfiguration configuration) 
     {
-        ConnectionString = "UsersDatabaseServer",
-        DatabaseName = "Users",
-        CollectionName = nameof(UserContext)
+        var connectionModel = GetConnectionModel(configuration);
+
+        SetupConnectionAsync(connectionModel);
+
+        Items = MongoDatabase.GetCollection<UserModel>(connectionModel.CollectionName);
+    }
+
+    private static ConnectionModel GetConnectionModel(IConfiguration configuration) => new()
+    {
+        ConnectionString = configuration["ConnectionStrings:UsersDatabaseServer"],
+        DatabaseName = configuration["DatabaseNames:Users"],
+        CollectionName = configuration[$"CollectionNames:{GetCollectionNameFromContextName()}"]
     };
 
-    public UserContext(IConfiguration configuration) : base(configuration, connectionModel) =>
-        Items = MongoDatabase.GetCollection<UserModel>(connectionModel.CollectionName);
+    private static string GetCollectionNameFromContextName(string nameOfContext = nameof(UserContext)) =>
+        nameOfContext.Substring(0, nameOfContext.LastIndexOf("Context"));
 }
