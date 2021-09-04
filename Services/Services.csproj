@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SartainStudios.Common" Version="1.6.8" />
+    <PackageReference Include="SartainStudios.Cryptography" Version="1.0.0" />
+    <PackageReference Include="SartainStudios.Http" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Consumables\Consumables.csproj" />
+  </ItemGroup>
+
+</Project>
