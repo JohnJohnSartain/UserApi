@@ -12,9 +12,9 @@ public class UserContext : MongoNonUserSpecificDatabaseAccess<UserModel>, IUserC
 {
     private static readonly ConnectionModel connectionModel = new()
     {
-        CollectionName = "UsersDatabase",
+        ConnectionString = "UsersDatabaseServer",
         DatabaseName = "Users",
-        ConnectionString = nameof(UserContext)
+        CollectionName = nameof(UserContext)
     };
 
     public UserContext(IConfiguration configuration) : base(configuration, connectionModel) =>
