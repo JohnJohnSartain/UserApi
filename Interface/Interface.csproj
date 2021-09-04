@@ -13,11 +13,11 @@
 
   <ItemGroup>
     <PackageReference Include="AutoWrapper.Core" Version="4.5.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
     <PackageReference Include="SartainStudios.Common" Version="1.6.8" />
     <PackageReference Include="SartainStudios.Http" Version="1.0.0" />
     <PackageReference Include="SartainStudios.Log" Version="1.0.5" />
-    <PackageReference Include="SartainStudios.Token" Version="1.0.0" />
+    <PackageReference Include="SartainStudios.Token" Version="1.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
   </ItemGroup>
 
