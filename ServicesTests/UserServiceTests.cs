@@ -250,6 +250,28 @@ public class UserServiceTests
 
         _userConsumableMock.Verify(x => x.UpdateAsync(id, userModel), Moq.Times.Once());
     }
+
+    [Test]
+    public async Task UpdateAsync_Does_Not_Allow_Password_To_Be_Changed()
+    {
+        const string username = "SomeUser";
+        const string password = "SomePassword";
+        const string id = "SomeId";
+        var userModel = new UserModel { Id = id, Username = username, Password = "SomePassword" };
+        var userModelList = new List<UserModel> { userModel };
+
+        _userConsumableMock.Setup(x =>
+            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+
+        _userConsumableMock.Setup(x =>
+            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+
+        var updatedUserModel = new UserModel { Id = id, Username = username, Password = "ChangedPassword" };
+
+        await _userService.UpdateAsync(null, updatedUserModel);
+
+        _userConsumableMock.Verify(x => x.UpdateAsync(id, It.Is<UserModel>(x => x.Password == userModel.Password)), Moq.Times.Once());
+    }
     #endregion
 
     #region ChangePassword

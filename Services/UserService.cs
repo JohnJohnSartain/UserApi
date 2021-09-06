@@ -66,9 +66,13 @@ public class UserService : IUserService
 
     public async Task UpdateAsync(string _, UserModel userModel)
     {
-        if (!userModel.Username.ToLower().Equals((await GetByIdAsync(userModel.Id)).Username.ToLower()))
+        var originalUserModel = await GetByIdAsync(userModel.Id);
+
+        if (!userModel.Username.ToLower().Equals((originalUserModel).Username.ToLower()))
             await ValidateUsername(userModel);
         await ValidatePassword(userModel);
+
+        userModel.Password = originalUserModel.Password;
 
         await _userConsumable.UpdateAsync(userModel.Id, userModel);
     }
