@@ -171,6 +171,7 @@ public class UserServiceTests
         Assert.AreEqual(SampleId1, result.Id);
     }
 
+    #region UpdateAsync
     [Test]
     public async Task UpdateAsync_CallsGetByIdAsync_ToCheck_If_Username_Is_InUse()
     {
@@ -231,25 +232,6 @@ public class UserServiceTests
     }
 
     [Test]
-    public async Task UpdateAsync_CallsGenerateHashOnce_With_ExpectedParameter()
-    {
-        const string username = "SomeUser";
-        const string password = "SomePassword";
-        var userModel = new UserModel { Username = username, Password = "SomePassword" };
-        var userModelList = new List<UserModel> { userModel };
-
-        _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
-
-        _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
-
-        await _userService.UpdateAsync(null, userModel);
-
-        _hasherMock.Verify(x => x.GenerateHash(password), Moq.Times.Once);
-    }
-
-    [Test]
     public async Task UpdateAsync_UpdateAsync_Once()
     {
         const string username = "SomeUser";
@@ -268,6 +250,86 @@ public class UserServiceTests
 
         _userConsumableMock.Verify(x => x.UpdateAsync(id, userModel), Moq.Times.Once());
     }
+    #endregion
+
+    #region ChangePassword
+    [Test]
+    public async Task ChangePassword_CallsGetByIdAsync_ToCheck_If_Username_Is_InUse()
+    {
+        const string username = "SomeUser";
+        var userModel = new UserModel { Username = username, Password = "SomePassword" };
+        var userModelList = new List<UserModel> { userModel };
+
+        _userConsumableMock.Setup(x =>
+            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+
+        _userConsumableMock.Setup(x =>
+            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+
+        await _userService.ChangePassword(null, userModel);
+
+        _userConsumableMock.Verify(x => x.GetByIdAsync(userModel.Id), Moq.Times.Once);
+    }
+
+    [Test]
+    public async Task ChangePassword_ThrowsArgumentExceptionWithExpectedDetails_If_Password_ContainsUserName()
+    {
+        const string username = "SomeUser";
+        var userModel = new UserModel { Username = username, Password = "SomeUserPassword" };
+        var userModelList = new List<UserModel> { userModel };
+
+        _userConsumableMock.Setup(x =>
+            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+
+        _userConsumableMock.Setup(x =>
+            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+
+        var result = Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _userService.ChangePassword(null, userModel));
+
+        Assert.AreEqual("Password", result.ParamName);
+        Assert.AreEqual("Password contains Username (Parameter 'Password')", result.Message);
+    }
+
+    [Test]
+    public async Task ChangePassword_CallsGenerateHashOnce_With_ExpectedParameter()
+    {
+        const string username = "SomeUser";
+        const string password = "SomePassword";
+        var userModel = new UserModel { Username = username, Password = "SomePassword" };
+        var userModelList = new List<UserModel> { userModel };
+
+        _userConsumableMock.Setup(x =>
+            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+
+        _userConsumableMock.Setup(x =>
+            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+
+        await _userService.ChangePassword(null, userModel);
+
+        _hasherMock.Verify(x => x.GenerateHash(password), Moq.Times.Once);
+    }
+
+    [Test]
+    public async Task ChangePassword_UpdateAsync_Once()
+    {
+        const string username = "SomeUser";
+        const string password = "SomePassword";
+        const string id = "SomeId";
+        var userModel = new UserModel { Id = id, Username = username, Password = "SomePassword" };
+        var userModelList = new List<UserModel> { userModel };
+
+        _userConsumableMock.Setup(x =>
+            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+
+        _userConsumableMock.Setup(x =>
+            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+
+        await _userService.ChangePassword(null, userModel);
+
+        _userConsumableMock.Verify(x => x.UpdateAsync(id, userModel), Moq.Times.Once());
+    }
+    #endregion
 
     [Test]
     public async Task CreateAsync_ThrowsArgumentExceptionWithExpectedDetails_If_UsernameIs_InUse()

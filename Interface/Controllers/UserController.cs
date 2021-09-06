@@ -50,7 +50,7 @@ namespace Interface.Controllers
         {
             Log.LogInformation(
                 $"Update User Model: {userModel.Id} by userId: {GetUserId()}",
-                GetType().Name, nameof(Update), null);
+                GetType().Name, nameof(Patch), null);
 
             if (IsUserLeastPrivileged())
                 throw new ApiException("User Not Authorized to update other user's account", 401);
@@ -58,6 +58,23 @@ namespace Interface.Controllers
             await UserService.UpdateAsync(null, userModel);
 
             return new ApiResponse("User details were updated", userModel.Id);
+        }
+
+        // PATCH: /User/Password
+        [HttpPatch("Password")]
+        [Authorize(Roles = Role.Service + "," + Role.User + "," + Role.Administrator)]
+        public async Task<ApiResponse> ChangePassword(UserModel userModel)
+        {
+            Log.LogInformation(
+                $"Update User Model: {userModel.Id} by userId: {GetUserId()}",
+                GetType().Name, nameof(ChangePassword), null);
+
+            if (IsUserLeastPrivileged())
+                throw new ApiException("User Not Authorized to change other user's password", 401);
+
+            await UserService.ChangePassword(null, userModel);
+
+            return new ApiResponse("User password was changed", userModel.Id);
         }
 
         // POST: /User

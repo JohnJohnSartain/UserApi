@@ -13,6 +13,7 @@ public interface IUserService : IBaseNonSpecificUserConsumable<UserModel>
     Task<bool> CredentialsAreValidAsync(UserModel userModel);
     Task<int> UserCount();
     Task<string> GetUserId(string username);
+    Task ChangePassword(string _, UserModel userModel);
 }
 
 public class UserService : IUserService
@@ -69,9 +70,18 @@ public class UserService : IUserService
             await ValidateUsername(userModel);
         await ValidatePassword(userModel);
 
-        userModel.Password = HashPassword(userModel.Password);
-
         await _userConsumable.UpdateAsync(userModel.Id, userModel);
+    }
+
+    public async Task ChangePassword(string _, UserModel userModel)
+    {
+        var originalUserModel = await GetByIdAsync(userModel.Id);
+
+        await ValidatePassword(userModel);
+
+        originalUserModel.Password = HashPassword(userModel.Password);
+
+        await _userConsumable.UpdateAsync(userModel.Id, originalUserModel);
     }
 
     public async Task<string> CreateAsync(UserModel userModel)
