@@ -3,9 +3,9 @@ using Interface.Controllers.Base;
 using Interface.Controllers.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sartain_Studios_Common.SharedEntities;
+using SartainStudios.Entities.Entities;
+using SartainStudios.SharedModels.Users;
 using Services;
-using SharedModels;
 
 namespace Interface.Controllers
 {
@@ -25,7 +25,7 @@ namespace Interface.Controllers
         {
             Log.LogInformation("GetAllUsers", GetType().Name, nameof(GetAll), null);
 
-            return Ok(await _userService.GetAllAsync());
+            return Ok(await _userService.GetAsync());
         }
 
         // GET: /User/someid
@@ -35,7 +35,7 @@ namespace Interface.Controllers
         {
             Log.LogInformation($"GetById: {id}", GetType().Name, nameof(GetById), null);
 
-            return Ok(await UserService.GetByIdAsync(id));
+            return Ok(await UserService.GetAsync(id));
         }
 
         // PUT: /User
@@ -153,7 +153,7 @@ namespace Interface.Controllers
 
             Log.LogInformation($"GetUserProfile: {userId}", GetType().Name, nameof(GetUserProfile), null);
 
-            return Ok(await UserService.GetByIdAsync(userId));
+            return Ok(await UserService.GetAsync(userId));
         }
     }
 }

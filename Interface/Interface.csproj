@@ -3,22 +3,24 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>d68e4b48-5849-4c93-aa23-1c5f399cd088</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <_WebToolingArtifacts Remove="Properties\PublishProfiles\Production.pubxml" />
-    <_WebToolingArtifacts Remove="Properties\PublishProfiles\UserTesting.pubxml" />
+    <None Include="Properties\PublishProfiles\Production.pubxml.user" />
+    <None Include="Properties\PublishProfiles\UserTesting.pubxml.user" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoWrapper.Core" Version="4.5.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
-    <PackageReference Include="SartainStudios.Common" Version="1.6.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
+    <PackageReference Include="SartainStudios.DatabaseInteraction" Version="1.0.3" />
     <PackageReference Include="SartainStudios.Http" Version="1.0.1" />
     <PackageReference Include="SartainStudios.Log" Version="1.0.5" />
-    <PackageReference Include="SartainStudios.Token" Version="1.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
+    <PackageReference Include="SartainStudios.SharedModels" Version="1.0.4" />
+    <PackageReference Include="SartainStudios.Token" Version="1.0.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.2" />
   </ItemGroup>
 
   <ItemGroup>

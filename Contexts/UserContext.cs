@@ -1,8 +1,8 @@
-﻿using DatabaseInteraction;
-using DatabaseInteraction.Models;
-using Microsoft.Extensions.Configuration;
-using SartainStudios.DataAccess.Interfaces;
-using SharedModels;
+﻿using Microsoft.Extensions.Configuration;
+using SartainStudios.DatabaseInteraction.Interfaces.NonUserSpecific;
+using SartainStudios.DatabaseInteraction.Mongo;
+using SartainStudios.DatabaseInteraction.Mongo.Models;
+using SartainStudios.SharedModels.Users;
 
 namespace Contexts;
 

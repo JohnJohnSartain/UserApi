@@ -1,9 +1,9 @@
 ﻿using Consumables;
 using Microsoft.Extensions.Configuration;
-using Sartain_Studios_Common.SharedEntities;
-using SartainStudios.Common.Consumables;
 using SartainStudios.Cryptography;
-using SharedModels;
+using SartainStudios.DatabaseInteraction.Consumables;
+using SartainStudios.Entities.Entities;
+using SartainStudios.SharedModels.Users;
 
 namespace Services;
 
@@ -30,11 +30,11 @@ public class UserService : IUserService
     }
 
     public async Task<bool> UsernameExistsAsync(string username) =>
-        (await GetAllAsync()).Any(x => x.Username != null && x.Username.Equals(username));
+        (await GetAsync()).Any(x => x.Username != null && x.Username.Equals(username));
 
     public async Task<bool> CredentialsAreValidAsync(UserModel userCredentials)
     {
-        var userModels = await GetAllAsync();
+        var userModels = await GetAsync();
 
         userCredentials.Password = _hash.GenerateHash(userCredentials.Password);
 
@@ -43,11 +43,11 @@ public class UserService : IUserService
             && CredentialsMatch(userCredentials.Password, userModel.Password));
     }
 
-    public async Task<int> UserCount() => (await GetAllAsync()).Count();
+    public async Task<int> UserCount() => (await GetAsync()).Count();
 
     public async Task<string> GetUserId(string username)
     {
-        var userModels = await GetAllAsync();
+        var userModels = await GetAsync();
 
         if (await UsernameExistsAsync(username))
         {
@@ -60,13 +60,13 @@ public class UserService : IUserService
         throw new KeyNotFoundException($"User with username: {username} not found");
     }
 
-    public async Task<IEnumerable<UserModel>> GetAllAsync() => (await _userConsumable.GetAllAsync()).ToList();
+    public async Task<IEnumerable<UserModel>> GetAsync() => (await _userConsumable.GetAsync()).ToList();
 
-    public async Task<UserModel> GetByIdAsync(string userId) => await _userConsumable.GetByIdAsync(userId);
+    public async Task<UserModel> GetAsync(string userId) => await _userConsumable.GetAsync(userId);
 
     public async Task UpdateAsync(string _, UserModel userModel)
     {
-        var originalUserModel = await GetByIdAsync(userModel.Id);
+        var originalUserModel = await GetAsync(userModel.Id);
 
         if (!userModel.Username.ToLower().Equals((originalUserModel).Username.ToLower()))
             await ValidateUsername(userModel);
@@ -79,7 +79,7 @@ public class UserService : IUserService
 
     public async Task ChangePassword(string _, UserModel userModel)
     {
-        var originalUserModel = await GetByIdAsync(userModel.Id);
+        var originalUserModel = await GetAsync(userModel.Id);
 
         await ValidatePassword(userModel);
 

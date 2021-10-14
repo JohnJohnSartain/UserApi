@@ -1,6 +1,6 @@
 ﻿using Contexts;
-using SartainStudios.Common.Consumables;
-using SharedModels;
+using SartainStudios.DatabaseInteraction.Consumables;
+using SartainStudios.SharedModels.Users;
 
 namespace Consumables;
 

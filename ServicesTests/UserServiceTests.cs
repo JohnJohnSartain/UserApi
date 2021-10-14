@@ -2,10 +2,10 @@ using Consumables;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
-using Sartain_Studios_Common.SharedEntities;
 using SartainStudios.Cryptography;
+using SartainStudios.Entities.Entities;
+using SartainStudios.SharedModels.Users;
 using Services;
-using SharedModels;
 
 namespace ServicesTests;
 
@@ -27,7 +27,7 @@ public class UserServiceTests
     private readonly Mock<IConfiguration> _configurationMock = new();
     private readonly Mock<IConfigurationSection> _configurationSectionMock = new();
 
-    private Mock<IHash> _hasherMock;
+    private Mock<IHash> _hashMock;
 
     private Mock<IUserConsumable> _userConsumableMock;
 
@@ -44,17 +44,17 @@ public class UserServiceTests
             .Returns(_configurationSectionMock.Object);
 
         _userConsumableMock = new Mock<IUserConsumable>();
-        _hasherMock = new Mock<IHash>();
+        _hashMock = new Mock<IHash>();
 
-        _hasherMock.Setup(x => x.GenerateHash(It.IsAny<string>())).Returns("somehashedstring");
+        _hashMock.Setup(x => x.GenerateHash(It.IsAny<string>())).Returns("somehashedstring");
 
-        _userService = new UserService(_userConsumableMock.Object, _hasherMock.Object, _configurationMock.Object);
+        _userService = new UserService(_userConsumableMock.Object, _hashMock.Object, _configurationMock.Object);
     }
 
     [Test]
     public async Task UsernameExistsAsync_ReturnsFalse_If_NoModelExists_WithUsername()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
 
         var result = await _userService.UsernameExistsAsync("Not real username");
 
@@ -64,7 +64,7 @@ public class UserServiceTests
     [Test]
     public async Task UsernameExistsAsync_ReturnsTrue_If_ModelExists_WithUsername()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
 
         var result = await _userService.UsernameExistsAsync("John");
 
@@ -74,7 +74,7 @@ public class UserServiceTests
     [Test]
     public async Task UsernameExistsAsync_ReturnsFalseIfNoModelExistsWithUsername()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
 
         var result = await _userService.UsernameExistsAsync(SampleId1);
 
@@ -84,7 +84,7 @@ public class UserServiceTests
     [Test]
     public async Task UsernameExistsAsync_ReturnsTrueIfModelExistsWithUsername()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
 
         var result = await _userService.UsernameExistsAsync("John");
 
@@ -94,9 +94,9 @@ public class UserServiceTests
     [Test]
     public async Task AreCredentialsValidAsync_ReturnsFalseIfNoModelExistsForProvidedUsernameAndPassword()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
 
-        _hasherMock.Setup(x => x.GenerateHash("JohnsPassword")).Returns("Hashed JohnsPassword");
+        _hashMock.Setup(x => x.GenerateHash("JohnsPassword")).Returns("Hashed JohnsPassword");
 
         var result = await _userService.CredentialsAreValidAsync(new UserModel
         { Username = "John", Password = "Hashed JohnsPassword" });
@@ -107,9 +107,9 @@ public class UserServiceTests
     [Test]
     public async Task AreCredentialsValidAsync_ReturnsTrueIfModelExistsForProvidedUsernameAndPassword()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
 
-        _hasherMock.Setup(x => x.GenerateHash("JohnsPassword")).Returns("Hashed JohnsPassword");
+        _hashMock.Setup(x => x.GenerateHash("JohnsPassword")).Returns("Hashed JohnsPassword");
 
         var result = await _userService.CredentialsAreValidAsync(new UserModel
         { Username = "John", Password = "JohnsPassword" });
@@ -120,7 +120,7 @@ public class UserServiceTests
     [Test]
     public async Task GetQuantityOfUsersAsync_ReturnsQuantityOfUserModels()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
 
         var result = await _userService.UserCount();
 
@@ -130,7 +130,7 @@ public class UserServiceTests
     [Test]
     public async Task GetUserIdFromUsername_ThrowsKeyNotFoundExceptionIfItemDoesNotExist()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
 
         Assert.ThrowsAsync<KeyNotFoundException>(async () => await _userService.GetUserId(SampleId1));
     }
@@ -138,7 +138,7 @@ public class UserServiceTests
     [Test]
     public async Task GetUserIdFromUsername_ReturnsUserIdWhenGivenValidUsername()
     {
-        _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
+        _userConsumableMock.Setup(x => x.GetAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
 
         var result = await _userService.GetUserId("John");
 
@@ -148,25 +148,25 @@ public class UserServiceTests
     [Test]
     public async Task GetAllAsync_CallsGetAllAsyncOnceAsync()
     {
-        await _userService.GetAllAsync();
+        await _userService.GetAsync();
 
-        _userConsumableMock.Verify(x => x.GetAllAsync(), Moq.Times.Once());
+        _userConsumableMock.Verify(x => x.GetAsync(), Moq.Times.Once());
     }
 
     [Test]
     public async Task GetByIdAsync_CallsGetByIdAsyncOnce()
     {
-        await _userService.GetByIdAsync(SampleId1);
+        await _userService.GetAsync(SampleId1);
 
-        _userConsumableMock.Verify(x => x.GetByIdAsync(SampleId1), Moq.Times.Once());
+        _userConsumableMock.Verify(x => x.GetAsync(SampleId1), Moq.Times.Once());
     }
 
     [Test]
     public async Task GetByIdAsync_ReturnsModelWithSpecifiedId()
     {
-        _userConsumableMock.Setup(x => x.GetByIdAsync(SampleId1)).Returns(Task.FromResult(UserModel1));
+        _userConsumableMock.Setup(x => x.GetAsync(SampleId1)).Returns(Task.FromResult(UserModel1));
 
-        var result = await _userService.GetByIdAsync(SampleId1);
+        var result = await _userService.GetAsync(SampleId1);
 
         Assert.AreEqual(SampleId1, result.Id);
     }
@@ -180,14 +180,14 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         await _userService.UpdateAsync(null, userModel);
 
-        _userConsumableMock.Verify(x => x.GetByIdAsync(userModel.Id), Moq.Times.Once);
+        _userConsumableMock.Verify(x => x.GetAsync(userModel.Id), Moq.Times.Once);
     }
 
     [Test]
@@ -199,10 +199,10 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(someOtherUserModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(someOtherUserModel));
 
         var result = Assert.ThrowsAsync<ArgumentException>(async () =>
             await _userService.UpdateAsync(null, userModel));
@@ -219,10 +219,10 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         var result = Assert.ThrowsAsync<ArgumentException>(async () =>
             await _userService.UpdateAsync(null, userModel));
@@ -241,10 +241,10 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         await _userService.UpdateAsync(null, userModel);
 
@@ -261,10 +261,10 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         var updatedUserModel = new UserModel { Id = id, Username = username, Password = "ChangedPassword" };
 
@@ -283,14 +283,14 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         await _userService.ChangePassword(null, userModel);
 
-        _userConsumableMock.Verify(x => x.GetByIdAsync(userModel.Id), Moq.Times.Once);
+        _userConsumableMock.Verify(x => x.GetAsync(userModel.Id), Moq.Times.Once);
     }
 
     [Test]
@@ -301,10 +301,10 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         var result = Assert.ThrowsAsync<ArgumentException>(async () =>
             await _userService.ChangePassword(null, userModel));
@@ -322,14 +322,14 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         await _userService.ChangePassword(null, userModel);
 
-        _hasherMock.Verify(x => x.GenerateHash(password), Moq.Times.Once);
+        _hashMock.Verify(x => x.GenerateHash(password), Moq.Times.Once);
     }
 
     [Test]
@@ -342,10 +342,10 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         await _userService.ChangePassword(null, userModel);
 
@@ -362,10 +362,10 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(userModelList.AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(someOtherUserModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(someOtherUserModel));
 
         var result = Assert.ThrowsAsync<ArgumentException>(async () =>
             await _userService.CreateAsync(userModel));
@@ -382,10 +382,10 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(new List<UserModel>().AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(new List<UserModel>().AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         var result = Assert.ThrowsAsync<ArgumentException>(async () =>
             await _userService.CreateAsync(userModel));
@@ -403,14 +403,14 @@ public class UserServiceTests
         var userModelList = new List<UserModel> { userModel };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(new List<UserModel>().AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(new List<UserModel>().AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         await _userService.CreateAsync(userModel);
 
-        _hasherMock.Verify(x => x.GenerateHash(password), Moq.Times.Once);
+        _hashMock.Verify(x => x.GenerateHash(password), Moq.Times.Once);
     }
 
     [Test]
@@ -421,10 +421,10 @@ public class UserServiceTests
         var userModel = new UserModel { Username = username, Password = "SomePassword", ProfilePhoto = "photo" };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(new List<UserModel>().AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(new List<UserModel>().AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         await _userService.CreateAsync(userModel);
 
@@ -449,10 +449,10 @@ public class UserServiceTests
         var userModel = new UserModel { Username = username, Password = "SomePassword" };
 
         _userConsumableMock.Setup(x =>
-            x.GetAllAsync()).Returns(Task.FromResult(new List<UserModel>().AsEnumerable()));
+            x.GetAsync()).Returns(Task.FromResult(new List<UserModel>().AsEnumerable()));
 
         _userConsumableMock.Setup(x =>
-            x.GetByIdAsync(userModel.Id)).Returns(Task.FromResult(userModel));
+            x.GetAsync(userModel.Id)).Returns(Task.FromResult(userModel));
 
         await _userService.CreateAsync(userModel);
 
