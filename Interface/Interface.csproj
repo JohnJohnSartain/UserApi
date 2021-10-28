@@ -8,11 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Properties\PublishProfiles\Production.pubxml.user" />
-    <None Include="Properties\PublishProfiles\UserTesting.pubxml.user" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoWrapper.Core" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
     <PackageReference Include="SartainStudios.DatabaseInteraction" Version="1.0.3" />
