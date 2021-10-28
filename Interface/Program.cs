@@ -35,9 +35,6 @@ builder.Services.AddSingleton<IHash, Hash>();
 
 builder.Services.AddSingleton<IUserService, UserService>();
 
-var logPath = builder.Configuration.GetSection("LogWriteLocation").Value;
-builder.Services.AddSingleton<SartainStudios.Log.ILog>(new SartainStudios.Log.Log(logPath));
-
 builder.Services.AddSingleton<IToken>(new JwtToken(AuthenticationSecret, AuthenticationExpirationInMinutes));
 #endregion
 

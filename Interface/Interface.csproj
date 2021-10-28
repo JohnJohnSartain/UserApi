@@ -17,7 +17,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
     <PackageReference Include="SartainStudios.DatabaseInteraction" Version="1.0.3" />
     <PackageReference Include="SartainStudios.Http" Version="1.0.1" />
-    <PackageReference Include="SartainStudios.Log" Version="1.0.5" />
     <PackageReference Include="SartainStudios.SharedModels" Version="1.0.4" />
     <PackageReference Include="SartainStudios.Token" Version="1.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.2" />
