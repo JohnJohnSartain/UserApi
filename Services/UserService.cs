@@ -30,7 +30,7 @@ public class UserService : IUserService
     }
 
     public async Task<bool> UsernameExistsAsync(string username) =>
-        (await GetAsync()).Any(x => x.Username != null && x.Username.Equals(username));
+        (await GetAsync()).Any(x => x.Username != null && x.Username.ToLower().Equals(username.ToLower()));
 
     public async Task<bool> CredentialsAreValidAsync(UserModel userCredentials)
     {
@@ -39,7 +39,7 @@ public class UserService : IUserService
         userCredentials.Password = _hash.GenerateHash(userCredentials.Password);
 
         return userModels.Any(userModel =>
-            CredentialsMatch(userCredentials.Username, userModel.Username)
+            CredentialsMatch(userCredentials.Username?.ToLower(), userModel.Username?.ToLower())
             && CredentialsMatch(userCredentials.Password, userModel.Password));
     }
 
@@ -49,9 +49,9 @@ public class UserService : IUserService
     {
         var userModels = await GetAsync();
 
-        if (await UsernameExistsAsync(username))
+        if (await UsernameExistsAsync(username.ToLower()))
         {
-            var userModel = userModels.Where(x => x.Username != null && x.Username.Equals(username))
+            var userModel = userModels.Where(x => x.Username != null && x.Username.ToLower().Equals(username.ToLower()))
                 .Select(x => x)
                 .First();
             return userModel.Id;
@@ -73,6 +73,7 @@ public class UserService : IUserService
         await ValidatePassword(userModel);
 
         userModel.Password = originalUserModel.Password;
+        userModel.Username = userModel.Username.ToLower();
 
         await _userConsumable.UpdateAsync(userModel.Id, userModel);
     }
@@ -93,6 +94,7 @@ public class UserService : IUserService
         await ValidateUsername(userModel);
         await ValidatePassword(userModel);
 
+        userModel.Username = userModel.Username.ToLower();
         userModel.Password = HashPassword(userModel.Password);
         userModel.Created = DateTime.UtcNow;
         userModel.Roles = new string[] { Role.User };
@@ -110,7 +112,7 @@ public class UserService : IUserService
 
     private async Task ValidateUsername(UserModel userModel)
     {
-        if (await UsernameExistsAsync(userModel.Username))
+        if (await UsernameExistsAsync(userModel.Username.ToLower()))
             throw new ArgumentException("Username already in use", nameof(userModel.Username));
     }
 
